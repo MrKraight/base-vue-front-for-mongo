@@ -45,6 +45,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     checkCookies() {
+      const socketService = useSocketStore();
       const token = Cookies.get('token');
       const storedUser = Cookies.get('user');
 

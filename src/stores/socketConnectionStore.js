@@ -2,23 +2,22 @@ import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import mitt from 'mitt';
 
-import chalk from 'chalk';
-
 import { useLoadingStore } from '@/stores/loadingStore.js';
 
-const socket_host = process.env.SOCKET_HOST;
-const socket_port = process.env.SOCKET_PORT;
+import chalk from 'chalk';
+
+const api_url = process.env.API_URL;
 
 export const useSocketStore = defineStore('socketio', {
   state: () => ({
-    host: `https://${socket_host}/${socket_port}`,
+    host: `${api_url}`,
     socket: null,
     isConnected: false,
     socketEvents: mitt()
   }),
   actions: {
-    connect(token) {
-      this.socket = io(this.host, {
+    connect(token){
+      this.socket = io(`${this.host}`, {
         extraHeaders: {
           Authorization: `Bearer ${token}`,
         },
@@ -54,9 +53,16 @@ export const useSocketStore = defineStore('socketio', {
         this.isConnected = false;
       });
 
+      this.socket.on('notification', (data) => {
+        const loadingStore = useLoadingStore();
+        this.socketEvents.emit('notification', data);
+        loadingStore.setLoading(false);
+      })
     },
     disconnect() {
-      this.socket.disconnect();
+      if(this.socket){
+        this.socket.disconnect(); 
+      }
       this.socket = null;
       this.isConnected = false;
     },

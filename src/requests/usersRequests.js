@@ -4,28 +4,28 @@ import { useLoadingStore } from '@/stores/loadingStore.js';
 const loadingStore = useLoadingStore();
 
 export default{
-    async getAllRequesits(){
+    async login(user){
         try {
             loadingStore.setLoading(true);
-            loadingStore.setLoadingMessage('getAllRequesits');
+            loadingStore.setLoadingMessage('login');
 
-            const response = await axios().get("/bank_requisits");
+            const response = await axios().post("/login", user);
 
             loadingStore.setLoading(false);
             
             return response;
           } catch (error) {
-            
+            loadingStore.setLoadingMessage('Неверный логин или пароль');            
         }
     },
 
-    async addRequesit(requesit){
+    async addUser(user){
         try {
             loadingStore.setLoading(true);
-            loadingStore.setLoadingMessage('addRequesit');
+            loadingStore.setLoadingMessage('addUser');
             
 
-            const response = await axios().post("/bank_requisits", requesit);
+            const response = await axios().post("/users", user);
 
             loadingStore.setLoading(false);           
             
@@ -33,51 +33,5 @@ export default{
           } catch (error) {
             
         }
-    },
-
-    async updateRequesit(requesitId, requesit){
-        try{
-            loadingStore.setLoading(true);
-            loadingStore.setLoadingMessage('updateRequesit');
-            
-
-            const response = await axios().put(`/bank_requisits/${requesitId}`, requesit);
-
-            loadingStore.setLoading(false);           
-            
-        }
-        catch(error){
-            
-        }
-    },
-
-    async removeRequesit(requesitId){
-        try {
-            loadingStore.setLoading(true);
-            loadingStore.setLoadingMessage('removeRequesit');
-
-            const response = await axios().delete(`/bank_requisits/${requesitId}`);
-
-            loadingStore.setLoading(false);
-            
-            return response;
-          } catch (error) {
-            
-        }
-    },
-
-    async getRequesitById(requesitId){
-        try {
-            loadingStore.setLoading(true);
-            loadingStore.setLoadingMessage('getRequesitById');
-
-            const response = await axios().get(`/bank_requisits/${requesitId}`);
-
-            loadingStore.setLoading(false);
-            
-            return response;
-          } catch (error) {
-            
-        }
-    },
+    }
 }

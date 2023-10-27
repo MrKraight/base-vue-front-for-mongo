@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const api_host = process.env.API_HOST;
-const api_port = process.env.API_PORT;
+const api_url = process.env.API_URL;
 
 import router from '../router';
 
@@ -10,7 +9,7 @@ import chalk from 'chalk';
 import { useAuthStore } from '@/stores/authStore.js';
 const authService = useAuthStore();
 
-export default(url=`https://${api_host}/${api_port}`) => {
+export default(url=`${api_url}`) => {
     let instance = axios.create({
         baseURL: url,
     })
