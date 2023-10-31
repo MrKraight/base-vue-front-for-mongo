@@ -1,4 +1,6 @@
 # base-vue-front-for-mongo
+    Видеодемонстрация: https://drive.google.com/file/d/1VFenj0nh1WfihfHhEDmacsTBv6a41Fi4/view
+    Бэкенд: https://github.com/MrKraight/base-mongo-api
     Базовый фронт на vue 3 для mongoDB бэка на node
     Задание:
     Написать редактор статей. Должны быть реализованы следующие возможности:
