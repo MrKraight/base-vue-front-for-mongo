@@ -19,13 +19,30 @@ export default{
         }
     },
 
-    async addNews(news){
+    async addNews(news, file){
         try {
             loadingStore.setLoading(true);
             loadingStore.setLoadingMessage('addNews');
-            
 
-            const response = await axios().post("/news", news);
+
+            console.log('file',file)
+
+
+            let formData = new FormData();
+            if(file)
+                formData.append('file', file, file.name);      
+
+            formData.append('news', JSON.stringify(news));
+
+            const config = {
+                headers: {
+                  'content-type': 'multipart/form-data',
+                }
+            };
+            
+            console.log('formData',formData)
+
+            const response = await axios().post("/news", formData, config);
 
             loadingStore.setLoading(false);           
             
@@ -35,13 +52,26 @@ export default{
         }
     },
 
-    async updateNews(newsId, news){
+    async updateNews(newsId, news, file){
         try{
             loadingStore.setLoading(true);
             loadingStore.setLoadingMessage('updateNews');
-            
 
-            const response = await axios().put(`/news/${newsId}`, news);
+            let formData = new FormData();
+            if(file)
+                formData.append('file', file);      
+
+            formData.append('news', JSON.stringify(news));
+
+            const config = {
+                headers: {
+                  'content-type': 'multipart/form-data',
+                }
+            };
+
+            console.log('formData',formData)
+
+            const response = await axios().put(`/news/${newsId}`, formData, config);
 
             loadingStore.setLoading(false);           
             

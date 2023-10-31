@@ -12,14 +12,13 @@
     import { useSocketStore } from "@/stores/socketConnectionStore";
     let socketService = useSocketStore();
 
-    const api_url = process.env.API_URL;
 
     let news = ref([]);
 
     let editorElement = ref(null);
     let createOrUpdateModalShow = ref(false);
     let editedNewsItem = ref(null);
-    let requestNewsItem = reactive({file: {},title: null, content: null, htmlContent:null, publicationDate: null});
+    let requestNewsItem = reactive({file: null,title: null, content: null, htmlContent:null, publicationDate: null});
     let documentFile = ref(null);
 
     onBeforeMount(async () => {
@@ -34,6 +33,7 @@
     async function getAllNews(){
         let response = await newsRequests.getAllNews();
         news.value = response.data;
+        createOrUpdateModalShow.value = false;
     }
 
     function mergeObjects(obj1, obj2) {
@@ -52,6 +52,7 @@
     function editNews(newsItem){
         editedNewsItem.value = {...newsItem};
         mergeObjects(editedNewsItem.value, requestNewsItem);
+        requestNewsItem._id = newsItem._id;
         createOrUpdateModalShow.value = true
     }
 
@@ -75,22 +76,26 @@
         h.then(async html => {
             requestNewsItem.htmlContent = html;
             if(editedNewsItem.value){
-                await newsRequests.updateNews(editedNewsItem.value._id, requestNewsItem);
+                await newsRequests.updateNews(editedNewsItem.value._id, requestNewsItem, documentFile.value);
                 await getAllNews();
             }else{
-                newsRequests.addNews(requestNewsItem);
+                await newsRequests.addNews(requestNewsItem, documentFile.value);
             }
+
             createOrUpdateModalShow.value = false;
-            console.log(createOrUpdateModalShow.value);
-            if(documentFile.value){
-                requestNewsItem.file._id
-                await filesRequests.addFile(requestNewsItem.file._id,documentFile.value);
-            }
         });
     };
 
     async function getFile(fileId){
         await filesRequests.getFile(fileId);
+    }
+
+    async function deleteFile(newsId){
+        if(confirm("Вы уверены что хотите удалить файл?")){
+            requestNewsItem.file = null;
+            await filesRequests.removeFile(newsId);
+            await getAllNews();
+        }
     }
 
 </script>
@@ -101,7 +106,10 @@
             <Text v-model="requestNewsItem.title" label="Заголовок"></Text> 
             <md-editor ref="editorElement" @onSave="onSave" v-model="requestNewsItem.content" class="mb-3" language="en-US" :toolbarsExclude="['save']"  />
             <Text v-if="editedNewsItem == null" v-model="requestNewsItem.publicationDate"  label="Дата публикации" type="datetime-local"></Text>
-            <input class="form-control mb-3" @change="handleFileChange" type="file">
+            <div class="btn-group btn-group-sm mb-3 w-100">
+                <input class="form-control input-group-text" @change="handleFileChange" type="file">
+                <button v-if="requestNewsItem.file && requestNewsItem.file.name" @click="deleteFile(requestNewsItem._id)" class="btn btn-danger" style="width: 150px;">Удалить файл</button>
+            </div>
             <button class="btn btn-primary" @click="addOrUpdateNews">Сохранить</button>
         </Modal>
         <button class="btn btn-primary mb-3" @click="createNews">Создать новость</button>
@@ -126,7 +134,9 @@
                 <div class="card-body">
                     <div class="news-item default-theme" v-html="newsItem.htmlContent ? newsItem.htmlContent : newsItem.content"></div>
                 </div>
-                <div class="card-footer" v-if="newsItem?.file?.name"><button @click="getFile(newsItem.file_id)" class="btn btn-primary" download="">Скачать файл</button></div>
+                <div class="card-footer" v-if="newsItem?.file?.name">
+                    <button @click="getFile(newsItem.file._id)" class="btn btn-primary">Скачать файл</button>
+                </div>
             </div>
         </div>
     </div>

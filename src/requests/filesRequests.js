@@ -1,5 +1,7 @@
 import axios from "@/services/axios";
 
+import {saveFile} from '../services/filesystem.js';
+
 import { useLoadingStore } from '@/stores/loadingStore.js';
 const loadingStore = useLoadingStore();
 
@@ -9,7 +11,17 @@ export default{
             loadingStore.setLoading(true);
             loadingStore.setLoadingMessage('getAllFile');
 
-            const response = await axios().get(`/files/${fileId}`);
+            const response = await axios().get(`/files/${fileId}`, { responseType: 'arraybuffer' });
+
+            const headers = response.headers;
+            console.log('headers',headers)
+
+  
+            let filename = headers['filename'];
+            let mime = headers['mime-type'];
+
+            if(response.data)
+              saveFile(response.data, mime, filename);
 
             loadingStore.setLoading(false);
             
@@ -39,12 +51,12 @@ export default{
         }
     },
 
-    async removeFile(fileId){
+    async removeFile(newsId){
         try {
             loadingStore.setLoading(true);
             loadingStore.setLoadingMessage('removeFile');
 
-            const response = await axios().delete(`/files/${fileId}`);
+            const response = await axios().delete(`/news/${newsId}/files`);
 
             loadingStore.setLoading(false);
             
